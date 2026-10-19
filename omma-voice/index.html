@@ -143,8 +143,6 @@ img{max-width:100%}
 #backBtn:active{transform:translateY(4px); box-shadow:0 1px 0 var(--l)}
 .bigrow.nospeak #backBtn{display:block}
 .frame .in{position:relative}
-#ghost{position:absolute; inset:0; padding:6px 8px 128px; font:inherit; font-size:22px; line-height:1.35; font-weight:600; white-space:pre-wrap; overflow:hidden; pointer-events:none; color:transparent; overflow-wrap:break-word}
-#ghostTxt{color:#A9A1A1; pointer-events:auto}
 @media (max-width:339px){ .bigrow .mid{display:none} }
 
 /* ---------- bottom nav ---------- */
@@ -270,7 +268,7 @@ body.kb #nav{display:none}
 .tbl .ok{color:#3E7B49; font-weight:900}
 .tbl .no{color:#B79A98}
 
-#endBtn{width:50px; min-height:46px; padding:2px; font-size:12px; line-height:1.15; border-radius:10px; margin-bottom:3px; align-self:center; white-space:normal; overflow-wrap:break-word}
+#endBtn{flex:none; width:50px; min-height:46px; padding:2px; font-size:12px; line-height:1.15; border-radius:10px; margin-bottom:3px; align-self:center; white-space:normal; overflow-wrap:break-word}
 #endBtn[hidden]{display:none}
 
 </style>
@@ -289,7 +287,7 @@ body.kb #nav{display:none}
     <div class="sp-main">
       <main class="sp-col">
         <section id="writeView" class="view">
-          <div class="frame"><div class="in"><textarea id="box" placeholder="여기에 입력하세요" aria-label="말할 내용" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><div id="ghost" aria-hidden="true"><span id="ghostPre"></span><span id="ghostTxt"></span></div></div></div>
+          <div class="frame"><div class="in"><textarea id="box" placeholder="여기에 입력하세요" aria-label="말할 내용" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea></div></div>
           <div id="chips" aria-label="추천 단어와 문장"></div>
         </section>
         <section id="phraseView" class="view" hidden>
@@ -413,6 +411,7 @@ body.kb #nav{display:none}
     <label>언어<select id="setLang"></select></label>
     <label>목소리<select id="setVoice"></select></label>
     <label>말하는 속도<input id="setRate" type="range" min="0.5" max="1.5" step="0.05"></label>
+    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 19/10 13:13</p>
     <label>즐겨찾기 개수: <b id="setFavN">5</b>개<input id="setFav" type="range" min="3" max="20" step="1"></label>
     <label>목소리 크기<input id="setVol" type="range" min="0.2" max="1" step="0.05"></label>
     <div class="row"><button id="testVoice" class="b3" type="button">목소리 들어보기</button><button id="testCall" class="b3 r" type="button">부르는 소리 들어보기</button></div>
@@ -817,7 +816,7 @@ function paintSpeak(){
   b.setAttribute('aria-label',speaking?'멈추기':'말하기');
   b.classList.toggle('talking',speaking);
 }
-function record(text){
+function record(text){ setTimeout(function(){ try{renderChips();}catch(e){} },0);
   var t=text.trim(); if(!t) return;
   S.recent=[t].concat((S.recent||[]).filter(function(x){ return x!==t; })).slice(0,20);
   var now=Date.now(), s=S.stats.sents[t]||{n:0,t:0}; s.n++; s.t=now; S.stats.sents[t]=s;
@@ -830,42 +829,31 @@ function record(text){
   save();
 }
 
-// ---------- prediction pool ----------
-function model(){
-  var items=[], m=sessionMeeting();
-  if(m){
-    filled(m).forEach(function(p){ items.push(p.text.trim()); });
-    SEC_KEYS.map(function(k){ return secText(m,k); }).join('\n').split(/\n+/).forEach(function(line){ line=line.trim(); if(line&&line.length<=80) items.push(line); });
-  }
-  S.tabs.forEach(function(t){ t.items.forEach(function(i){ items.push(i.text); }); });
-  return {sents:S.stats.sents,words:S.stats.words,items:items};
-}
-
-// ---------- notebook / speak ----------
+// ---------- quick buttons under the text box: this meeting's prompts, then what she uses most ----------
 var box=$('box');
-function chipColor(sug){
-  var t=sug.text, m=sessionMeeting(), i, j;
-  if(m){ var f=filled(m); for(i=0;i<f.length;i++) if(f[i].text.trim()===t) return COLOR_CLS.y; }
-  for(i=0;i<S.tabs.length;i++) for(j=0;j<S.tabs[i].items.length;j++) if(S.tabs[i].items[j].text===t) return COLOR_CLS[S.tabs[i].color]||'';
-  if(sug.kind==='word'){
-    for(i=0;i<S.tabs.length;i++) for(j=0;j<S.tabs[i].items.length;j++) if(wordsOf(S.tabs[i].items[j].text).indexOf(t)>=0) return COLOR_CLS[S.tabs[i].color]||'';
+function quickList(max){
+  var out=[], seen={}, m=sessionMeeting();
+  function add(text,cls){ text=(text||'').trim(); if(!text||seen[text]||out.length>=max) return; seen[text]=1; out.push({text:text,cls:cls}); }
+  function colorOf(t){
+    for(var i=0;i<S.tabs.length;i++) for(var j=0;j<S.tabs[i].items.length;j++) if(S.tabs[i].items[j].text===t) return COLOR_CLS[S.tabs[i].color]||'';
+    return COLOR_CLS.gr;
   }
-  return COLOR_CLS.gr;
+  if(m) filled(m).forEach(function(p){ add(p.text,COLOR_CLS.y); });
+  Object.keys(S.stats.sents).sort(function(a,b){ var x=S.stats.sents[a], y=S.stats.sents[b]; return (y.n-x.n)||(y.t-x.t); }).forEach(function(t){ add(t,colorOf(t)); });
+  var k=0, more=true;
+  while(out.length<max&&more){
+    more=false;
+    S.tabs.forEach(function(tab){ if(tab.items[k]){ more=true; add(tab.items[k].text,COLOR_CLS[tab.color]||''); } });
+    k++;
+  }
+  return out;
 }
 function renderChips(){
   var host=$('chips'); host.innerHTML='';
-  var m=sessionMeeting(), sugs;
-  if(m&&!box.value.trim()) sugs=filled(m).slice(0,8).map(function(p){ return {kind:'sentence',text:p.text.trim(),direct:true}; });
-  else sugs=predict(box.value,model(),8);
-  sugs.forEach(function(sug){
+  quickList(8).forEach(function(q){
     var b=document.createElement('button');
-    b.type='button'; b.className='b3 chip'+chipColor(sug); b.textContent=sug.text;
-    b.addEventListener('click',function(){
-      if(sug.kind==='sentence'){ if(say(sug.text)){ record(sug.text); renderChips(); } return; }
-      box.value=applySuggestion(box.value,sug);
-      onType();
-      box.focus(); box.setSelectionRange(box.value.length,box.value.length);
-    });
+    b.type='button'; b.className='b3 chip'+q.cls; b.textContent=q.text;
+    b.addEventListener('click',function(){ if(say(q.text)){ record(q.text); renderChips(); } });
     host.appendChild(b);
   });
 }
@@ -873,29 +861,7 @@ function paintNav(){
   $('prevBtn').disabled=!S.hist.length||hp===0;
   $('nextBtn').disabled=hp===null;
 }
-var ghostFull=null;
-function ghostUpdate(){
-  var gp=$('ghostPre'), gt=$('ghostTxt'), v=box.value; ghostFull=null; gp.textContent=v; gt.textContent='';
-  if(!v.trim()||speaking||box.selectionStart!==v.length||box.selectionEnd!==v.length) return;
-  var sugs=predict(v,model(),4), pick=null;
-  for(var i=0;i<sugs.length&&!pick;i++) if(sugs[i].kind==='sentence') pick=sugs[i];
-  if(!pick) pick=sugs[0];
-  if(!pick) return;
-  var full=applySuggestion(v,pick), k=0;
-  while(k<v.length&&k<full.length&&v.charAt(k)===full.charAt(k)) k++;
-  if(k<v.length-1||full.length<=k) return;
-  ghostFull=full; gt.textContent=full.slice(k);
-  if(k<v.length) gp.textContent=v.slice(0,k);
-}
-function ghostAccept(){
-  if(ghostFull==null) return;
-  box.value=ghostFull; onType(); box.focus(); box.setSelectionRange(box.value.length,box.value.length);
-}
-$('ghostTxt').addEventListener('click',function(e){ e.preventDefault(); ghostAccept(); });
-box.addEventListener('keydown',function(e){ if((e.key==='Tab'||e.key==='ArrowRight')&&ghostFull!=null&&box.selectionStart===box.value.length){ e.preventDefault(); ghostAccept(); } });
-box.addEventListener('scroll',function(){ $('ghost').scrollTop=box.scrollTop; });
-document.addEventListener('selectionchange',function(){ if(document.activeElement===box) ghostUpdate(); });
-function onType(){ hp=null; S.draft=box.value; save(); renderChips(); paintNav(); ghostUpdate(); }
+function onType(){ hp=null; S.draft=box.value; save(); renderChips(); paintNav(); }
 box.addEventListener('input',onType);
 
 $('backBtn').addEventListener('click',function(){ S.cur='write'; save(); renderSpeak(); });
@@ -973,7 +939,6 @@ function renderSpeak(){
   var write=S.cur==='write';
   $('writeView').hidden=!write; $('phraseView').hidden=write;
   $('bigrow').classList.toggle('nospeak',!write);
-  ghostUpdate();
   renderRail();
   if(write){ renderChips(); paintNav(); } else { renderPhraseView(); $('said').hidden=true; }
 }
