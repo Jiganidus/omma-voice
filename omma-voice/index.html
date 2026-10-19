@@ -336,6 +336,7 @@ body.kb #nav{display:none}
     <label>언어<select id="setLang"></select></label>
     <label>목소리<select id="setVoice"></select></label>
     <label>말하는 속도<input id="setRate" type="range" min="0.5" max="1.5" step="0.05"></label>
+    <label>즐겨찾기 개수: <b id="setFavN">5</b>개<input id="setFav" type="range" min="3" max="20" step="1"></label>
     <label>목소리 크기<input id="setVol" type="range" min="0.2" max="1" step="0.05"></label>
     <div class="row"><button id="testVoice" class="b3" type="button">목소리 들어보기</button><button id="testCall" class="b3 r" type="button">부르는 소리 들어보기</button></div>
     <p class="hint">부르는 소리가 작으면 휴대폰의 미디어 볼륨을 올려 주세요.</p>
@@ -636,16 +637,17 @@ var F={status:'all',range:'all',rec:'all'};
 // ---------- settings state (small, localStorage) ----------
 function defaults(){
   return {v:2,cur:'write',draft:'',hist:[],recent:[],stats:{sents:{},words:{}},
-    set:{lang:'ko-KR',voice:'',rate:1,vol:1},
+    set:{lang:'ko-KR',voice:'',rate:1,vol:1,favMax:5},
     tabs:DEFAULT_TABS.map(function(t){ return {id:uid(),name:t.name,color:t.color,items:t.items.map(function(x){ return {id:uid(),text:x}; })}; })};
 }
 function sane(d){
   if(!d||!Array.isArray(d.tabs)) return null;
   var base=defaults(), cols=['p','y','b'];
   d.hist=Array.isArray(d.hist)?d.hist:[];
-  d.recent=Array.isArray(d.recent)?d.recent.filter(function(x){ return typeof x==='string'&&x; }).slice(0,5):[];
+  d.recent=Array.isArray(d.recent)?d.recent.filter(function(x){ return typeof x==='string'&&x; }).slice(0,20):[];
   d.stats=d.stats&&d.stats.sents&&d.stats.words?d.stats:base.stats;
   d.set=Object.assign({},base.set,d.set||{});
+  d.set.favMax=Math.max(1,Math.min(20,parseInt(d.set.favMax,10)||5));
   d.cur=d.cur||'write'; d.draft=d.draft||'';
   d.tabs=d.tabs.filter(function(t){ return t&&t.name&&Array.isArray(t.items); }).map(function(t,i){
     return {id:t.id||uid(),name:String(t.name),color:COLOR_CLS[t.color]!==undefined?t.color:cols[i%3],
@@ -722,7 +724,7 @@ function paintSpeak(){
 }
 function record(text){
   var t=text.trim(); if(!t) return;
-  S.recent=[t].concat((S.recent||[]).filter(function(x){ return x!==t; })).slice(0,5);
+  S.recent=[t].concat((S.recent||[]).filter(function(x){ return x!==t; })).slice(0,20);
   var now=Date.now(), s=S.stats.sents[t]||{n:0,t:0}; s.n++; s.t=now; S.stats.sents[t]=s;
   wordsOf(t).forEach(function(w){ var o=S.stats.words[w]||{n:0,t:0}; o.n++; o.t=now; S.stats.words[w]=o; });
   var keys=Object.keys(S.stats.sents);
@@ -793,7 +795,7 @@ $('nextBtn').addEventListener('click',function(){
 
 // tabs: the meeting tab is virtual (its phrases live on the meeting)
 function getTab(id){
-  if(id==='__fav') return {id:'__fav',name:'즐겨찾기',color:'p',fav:true,items:(S.recent||[]).map(function(t,i){ return {id:'f'+i,text:t}; })};
+  if(id==='__fav') return {id:'__fav',name:'즐겨찾기',color:'p',fav:true,items:(S.recent||[]).slice(0,S.set.favMax||5).map(function(t,i){ return {id:'f'+i,text:t}; })};
   if(id==='__meet'){ var m=sessionMeeting(); return m?{id:'__meet',name:'이번 약속',color:'y',items:filled(m),virtual:true}:null; }
   for(var i=0;i<S.tabs.length;i++) if(S.tabs[i].id===id) return S.tabs[i];
   return null;
@@ -1238,7 +1240,7 @@ function renderAll(){
 function openSettings(){
   var sel=$('setLang');
   if(!sel.options.length) LANGS.forEach(function(l){ var o=document.createElement('option'); o.value=l[0]; o.textContent=l[1]; sel.appendChild(o); });
-  sel.value=S.set.lang; $('setRate').value=S.set.rate; $('setVol').value=S.set.vol;
+  sel.value=S.set.lang; $('setRate').value=S.set.rate; $('setVol').value=S.set.vol; $('setFav').value=S.set.favMax; $('setFavN').textContent=S.set.favMax;
   $('bkText').hidden=true; $('bkRow').hidden=true;
   delArmed.reset=false; $('resetBtn').textContent='처음 상태로 되돌리기';
   refreshVoices(); show('setModal');
@@ -1247,6 +1249,7 @@ $('gear').addEventListener('click',openSettings);
 $('setClose').addEventListener('click',function(){ hide('setModal'); });
 $('setLang').addEventListener('change',function(){ S.set.lang=$('setLang').value; S.set.voice=''; save(); refreshVoices(); });
 $('setVoice').addEventListener('change',function(){ S.set.voice=$('setVoice').value; save(); });
+$('setFav').addEventListener('input',function(){ S.set.favMax=parseInt($('setFav').value,10)||5; $('setFavN').textContent=S.set.favMax; save(); if(ui.page==='notebook'||ui.page==='speak') renderSpeak(); });
 $('setRate').addEventListener('input',function(){ S.set.rate=parseFloat($('setRate').value); save(); });
 $('setVol').addEventListener('input',function(){ S.set.vol=parseFloat($('setVol').value); save(); });
 $('testVoice').addEventListener('click',function(){ say(HELLO[S.set.lang.slice(0,2)]||HELLO.en); });
