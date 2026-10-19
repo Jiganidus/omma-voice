@@ -56,6 +56,14 @@ img{max-width:100%}
 }
 .b3.p{--c:var(--pink); --l:var(--pink-lip)}
 .b3.b{--c:var(--blue); --l:var(--blue-lip)}
+.b3.c-my{--c:#E6D58B; --l:#B9A455}
+.b3.c-g{--c:#A8C8A0; --l:#7A9D73}
+.b3.c-bl{--c:#F1D2CE; --l:#D2A8A3}
+.b3.c-v{--c:#7E69A8; --l:#584783; color:#fff}
+.b3.c-vl{--c:#CBBFE6; --l:#9F92C0}
+.b3.c-gr{--c:#C4C4C4; --l:#8E8E8E}
+.b3.c-mb{--c:#8FAEC7; --l:#637F99}
+.b3.c-m{--c:#8A3A48; --l:#5E2330; color:#fff}
 .b3.r{--c:var(--red);  --l:var(--red-lip); color:#fff}
 .b3:active,.b3.on{transform:translateY(2px); box-shadow:0 1px 0 var(--l)}
 .b3.on{outline:3px solid var(--rose); outline-offset:1px}
@@ -89,7 +97,7 @@ img{max-width:100%}
 }
 #box::placeholder{color:#B79A98; font-size:16px; font-weight:500}
 
-#chips{display:flex; flex-wrap:wrap; gap:4px 5px; align-content:flex-start; min-height:30px; max-height:68px; overflow:hidden; padding-bottom:2px}
+#chips{display:flex; flex-wrap:wrap; gap:4px 5px; align-content:flex-start; min-height:124px; max-height:128px; overflow:hidden; padding-bottom:2px}
 .chip{min-height:28px; padding:3px 10px; border-radius:8px; font-size:14px; max-width:100%; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .ctl3{display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
 .ctl3 .b3{min-height:32px; font-size:13px; padding:3px 4px}
@@ -188,7 +196,7 @@ body.kb #nav{display:none}
 .hint{margin:0; font-size:11px; color:var(--muted); line-height:1.45}
 .seg{display:flex; gap:5px}
 .seg .b3{flex:1; min-height:32px; font-size:13px; padding:6px 4px}
-.swatches{display:flex; gap:8px}
+.swatches{display:flex; flex-wrap:wrap; gap:8px}
 .swatches button{width:38px; height:38px; border-radius:10px; border:2px solid var(--rose); padding:0}
 .swatches button.on{outline:3px solid var(--text); outline-offset:3px}
 .rec-item{display:flex; flex-direction:column; gap:5px; padding:8px; border-radius:10px; background:var(--cream); border:2px solid var(--rose); color:var(--on)}
@@ -455,8 +463,8 @@ function histNext(hist, hp){
 }
 
 var DEFAULT_TABS=[
-  {name:'건강',color:'p',items:['물 주세요','밥 먹여 주세요','숨쉬기 힘들어요','아파요','자세를 바꿔 주세요','화장실에 가고 싶어요','추워요','더워요','베개를 고쳐 주세요','가래를 빼 주세요','약 주세요','침대를 올려 주세요']},
-  {name:'가족',color:'y',items:['잘 지냈어요?','밥 먹었어요?','오늘 뭐 했어요?','사랑해요','고마워요','보고 싶었어요','미안해요','와 줘서 고마워요','조심히 가세요','잠깐만요, 생각 중이에요']},
+  {name:'건강',color:'g',items:['물 주세요','밥 먹여 주세요','숨쉬기 힘들어요','아파요','자세를 바꿔 주세요','화장실에 가고 싶어요','추워요','더워요','베개를 고쳐 주세요','가래를 빼 주세요','약 주세요','침대를 올려 주세요']},
+  {name:'가족',color:'bl',items:['잘 지냈어요?','밥 먹었어요?','오늘 뭐 했어요?','사랑해요','고마워요','보고 싶었어요','미안해요','와 줘서 고마워요','조심히 가세요','잠깐만요, 생각 중이에요']},
   {name:'대화',color:'b',items:['네','아니요','맞아요','잘 모르겠어요','잠깐만요','다시 말해 주세요','천천히 말해 주세요','좋아요','괜찮아요','그만할게요']}
 ];
 var MEETING_PHRASES=['질문이 있어요','다시 설명해 주세요','천천히 말씀해 주세요','제가 쓴 메모를 봐 주세요','이 약의 부작용이 뭐예요?','검사 결과가 어때요?','다음 진료는 언제예요?','처방전을 받을 수 있나요?','잠깐만요, 쓰고 있어요','감사합니다'];
@@ -625,8 +633,10 @@ var $=function(id){ return document.getElementById(id); };
 var KEY='mal-helper-v1';
 var LANGS=[['ko-KR','한국어 (Korean)'],['en-AU','English (Australia)'],['zh-CN','中文 (Mandarin)'],['ja-JP','日本語 (Japanese)'],['vi-VN','Tiếng Việt (Vietnamese)'],['es-ES','Español (Spanish)'],['ar-SA','العربية (Arabic)'],['hi-IN','हिन्दी (Hindi)']];
 var HELLO={ko:'안녕하세요, 목소리 테스트입니다',en:'Hello, this is my voice',zh:'你好，这是我的声音',ja:'こんにちは、声のテストです',vi:'Xin chào, đây là giọng của tôi',es:'Hola, esta es mi voz',ar:'مرحبا، هذا صوتي',hi:'नमस्ते, यह मेरी आवाज़ है'};
-var COLOR_CLS={y:'',p:' p',b:' b'};
-var COLOR_VAR={y:'var(--yellow)',p:'var(--pink)',b:'var(--blue)'};
+var COLOR_CLS={y:'',p:' p',b:' b',my:' c-my',g:' c-g',bl:' c-bl',v:' c-v',vl:' c-vl',gr:' c-gr',mb:' c-mb',m:' c-m'};
+var COLOR_VAR={y:'#FBE286',p:'#F2B6B6',b:'#A0D4E9',my:'#E6D58B',g:'#A8C8A0',bl:'#F1D2CE',v:'#7E69A8',vl:'#CBBFE6',gr:'#C4C4C4',mb:'#8FAEC7',m:'#8A3A48'};
+var TAB_COLORS=['g','bl','b','my','y','p','vl','v','mb','gr','m'];
+
 
 var S, MT=[], session=null, bd=null, bdId=null, BOARDS={};
 var ui={page:'notebook'};
@@ -642,7 +652,7 @@ function defaults(){
 }
 function sane(d){
   if(!d||!Array.isArray(d.tabs)) return null;
-  var base=defaults(), cols=['p','y','b'];
+  var base=defaults(), cols=['g','bl','b'];
   d.hist=Array.isArray(d.hist)?d.hist:[];
   d.recent=Array.isArray(d.recent)?d.recent.filter(function(x){ return typeof x==='string'&&x; }).slice(0,20):[];
   d.stats=d.stats&&d.stats.sents&&d.stats.words?d.stats:base.stats;
@@ -650,6 +660,8 @@ function sane(d){
   d.set.favMax=Math.max(1,Math.min(20,parseInt(d.set.favMax,10)||5));
   d.cur=d.cur||'write'; d.draft=d.draft||'';
   d.tabs=d.tabs.filter(function(t){ return t&&t.name&&Array.isArray(t.items); }).map(function(t,i){
+    if(t.name==='건강'&&t.color==='p') t.color='g';
+    if(t.name==='가족'&&t.color==='y') t.color='bl';
     return {id:t.id||uid(),name:String(t.name),color:COLOR_CLS[t.color]!==undefined?t.color:cols[i%3],
       items:t.items.filter(function(x){ return x&&x.text; }).map(function(x){ return {id:x.id||uid(),text:String(x.text)}; })};
   });
@@ -751,8 +763,8 @@ var box=$('box');
 function renderChips(){
   var host=$('chips'); host.innerHTML='';
   var m=sessionMeeting(), sugs;
-  if(m&&!box.value.trim()) sugs=filled(m).slice(0,4).map(function(p){ return {kind:'sentence',text:p.text.trim(),direct:true}; });
-  else sugs=predict(box.value,model(),4);
+  if(m&&!box.value.trim()) sugs=filled(m).slice(0,8).map(function(p){ return {kind:'sentence',text:p.text.trim(),direct:true}; });
+  else sugs=predict(box.value,model(),8);
   sugs.forEach(function(sug){
     var b=document.createElement('button');
     b.type='button'; b.className='b3 chip'+(sug.kind==='word'?' b':''); b.textContent=sug.text;
@@ -795,7 +807,7 @@ $('nextBtn').addEventListener('click',function(){
 
 // tabs: the meeting tab is virtual (its phrases live on the meeting)
 function getTab(id){
-  if(id==='__fav') return {id:'__fav',name:'즐겨찾기',color:'p',fav:true,items:(S.recent||[]).slice(0,S.set.favMax||5).map(function(t,i){ return {id:'f'+i,text:t}; })};
+  if(id==='__fav') return {id:'__fav',name:'즐겨찾기',color:'my',fav:true,items:(S.recent||[]).slice(0,S.set.favMax||5).map(function(t,i){ return {id:'f'+i,text:t}; })};
   if(id==='__meet'){ var m=sessionMeeting(); return m?{id:'__meet',name:'이번 약속',color:'y',items:filled(m),virtual:true}:null; }
   for(var i=0;i<S.tabs.length;i++) if(S.tabs[i].id===id) return S.tabs[i];
   return null;
@@ -809,7 +821,7 @@ function renderRail(){
     b.addEventListener('click',fn); r.appendChild(b); return b;
   }
   mk('쓰기',COLOR_CLS.b,function(){ S.cur='write'; save(); renderSpeak(); },S.cur==='write');
-  mk('즐겨\n찾기',COLOR_CLS.p,function(){ S.cur='__fav'; save(); renderSpeak(); },S.cur==='__fav');
+  mk('즐겨\n찾기',COLOR_CLS.my,function(){ S.cur='__fav'; save(); renderSpeak(); },S.cur==='__fav');
   if(session) mk('이번\n약속',COLOR_CLS.y,function(){ S.cur='__meet'; save(); renderSpeak(); },S.cur==='__meet');
   S.tabs.forEach(function(t){ mk(t.name,COLOR_CLS[t.color]||'',function(){ S.cur=t.id; save(); renderSpeak(); },S.cur===t.id); });
   if(editMode) mk('+ 탭',' small',function(){ openTab(null); });
@@ -898,7 +910,7 @@ $('edRight').addEventListener('click',function(){ moveItem(1); });
 var tabColor='y';
 function paintTabColors(){
   var host=$('tabColors'); host.innerHTML='';
-  ['y','p','b'].forEach(function(c){
+  TAB_COLORS.forEach(function(c){
     var b=document.createElement('button'); b.type='button'; b.style.background=COLOR_VAR[c]; b.setAttribute('aria-label','색');
     if(c===tabColor) b.classList.add('on');
     b.addEventListener('click',function(){ tabColor=c; paintTabColors(); });
@@ -908,7 +920,7 @@ function paintTabColors(){
 function openTab(id){
   tabCtx=id; var t=id&&getTab(id);
   $('tabModalTitle').textContent=t?'탭 편집':'새 탭';
-  $('tabName').value=t?t.name:''; tabColor=t?t.color:['y','p','b'][S.tabs.length%3]; paintTabColors();
+  $('tabName').value=t?t.name:''; tabColor=t?t.color:TAB_COLORS[S.tabs.length%TAB_COLORS.length]; paintTabColors();
   ['tabDel','tabLeft','tabRight'].forEach(function(k){ $(k).hidden=!t; });
   delArmed.tab=false; $('tabDel').textContent='탭 삭제';
   show('tabModal'); $('tabName').focus();
