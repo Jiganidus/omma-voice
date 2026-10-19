@@ -415,9 +415,10 @@ body.kb #nav{display:none}
   <div class="panel" role="dialog" aria-labelledby="setTitle">
     <h3 id="setTitle">설정</h3>
     <label>언어<select id="setLang"></select></label>
-    <label>목소리<select id="setVoice"></select></label>
+    <label>목소리 <span id="voiceN" style="font-size:12px;color:#888"></span><select id="setVoice"></select></label>
+    <button id="voiceTest" type="button" class="b3 c-bl" style="min-height:34px;padding:4px 10px;font-size:13px;margin:4px 0 8px">▶ 이 목소리 들어보기</button>
     <label>말하는 속도<input id="setRate" type="range" min="0.5" max="1.5" step="0.05"></label>
-    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 19/10 14:51</p>
+    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 19/10 15:15</p>
     <button id="setUnhide" type="button" class="b3 c-gr" style="min-height:34px;padding:4px 10px;font-size:13px;margin:0 0 8px">숨긴 아래 버튼 다시 보기</button>
     <label>즐겨찾기 개수: <b id="setFavN">5</b>개<input id="setFav" type="range" min="3" max="20" step="1"></label>
     <label>목소리 크기<input id="setVol" type="range" min="0.2" max="1" step="0.05"></label>
@@ -796,6 +797,7 @@ function refreshVoices(){
   sel.innerHTML='';
   var auto=document.createElement('option'); auto.value=''; auto.textContent='자동 (가장 자연스러운 목소리)'; sel.appendChild(auto);
   list.forEach(function(v){ var o=document.createElement('option'); o.value=v.name; o.textContent=v.name+' ('+v.lang+')'; sel.appendChild(o); });
+  $('voiceN').textContent='('+list.length+'개)';
   sel.value=S.set.voice&&list.some(function(v){ return v.name===S.set.voice; })?S.set.voice:'';
 }
 var sayTok=0;
@@ -1466,6 +1468,7 @@ function openSettings(){
 $('gear').addEventListener('click',openSettings);
 $('setClose').addEventListener('click',function(){ hide('setModal'); });
 $('setLang').addEventListener('change',function(){ S.set.lang=$('setLang').value; S.set.voice=''; save(); refreshVoices(); });
+$('voiceTest').addEventListener('click',function(){ say('안녕하세요. 오늘 기분이 어떠세요?'); });
 $('setVoice').addEventListener('change',function(){ S.set.voice=$('setVoice').value; save(); });
 $('setUnhide').addEventListener('click',function(){ S.hidden=[]; save(); renderChips(); toast('다시 보여요'); });
 $('setFav').addEventListener('input',function(){ S.set.favMax=parseInt($('setFav').value,10)||5; $('setFavN').textContent=S.set.favMax; save(); if(ui.page==='notebook'||ui.page==='speak') renderSpeak(); });
