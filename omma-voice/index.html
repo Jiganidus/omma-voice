@@ -727,14 +727,7 @@ function say(text){
   if(!('speechSynthesis' in window)){ $('noTts').hidden=false; toast('이 화면에서는 음성이 안 나와요. Chrome 앱에서 열어 주세요'); return false; }
   speechSynthesis.cancel();
   var tok=++sayTok, parts=[], t=String(text).trim();
-  var isQ=/[?？]+\s*$/.test(t);
-  if(isQ){
-    // raise the pitch and slow down on the last word so a question sounds like a question
-    var body=t.replace(/[?？]+\s*$/,'').trim(), i=body.search(/\S+$/);
-    var head=body.slice(0,i).trim(), tail=body.slice(i);
-    if(head) parts.push({t:head+',',pitch:1,rate:1});
-    parts.push({t:tail+'?',pitch:1.55,rate:0.85});
-  }else parts.push({t:t,pitch:1,rate:1});
+  parts.push({t:t,pitch:1,rate:1});
   var v=voices.filter(function(x){ return x.name===S.set.voice; })[0]||langVoices()[0];
   speaking=true; paintSpeak();
   parts.forEach(function(pt,k){
