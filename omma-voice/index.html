@@ -635,7 +635,7 @@ var F={status:'all',range:'all',rec:'all'};
 
 // ---------- settings state (small, localStorage) ----------
 function defaults(){
-  return {v:2,cur:'write',draft:'',hist:[],stats:{sents:{},words:{}},
+  return {v:2,cur:'write',draft:'',hist:[],recent:[],stats:{sents:{},words:{}},
     set:{lang:'ko-KR',voice:'',rate:1,vol:1},
     tabs:DEFAULT_TABS.map(function(t){ return {id:uid(),name:t.name,color:t.color,items:t.items.map(function(x){ return {id:uid(),text:x}; })}; })};
 }
@@ -643,6 +643,7 @@ function sane(d){
   if(!d||!Array.isArray(d.tabs)) return null;
   var base=defaults(), cols=['p','y','b'];
   d.hist=Array.isArray(d.hist)?d.hist:[];
+  d.recent=Array.isArray(d.recent)?d.recent.filter(function(x){ return typeof x==='string'&&x; }).slice(0,5):[];
   d.stats=d.stats&&d.stats.sents&&d.stats.words?d.stats:base.stats;
   d.set=Object.assign({},base.set,d.set||{});
   d.cur=d.cur||'write'; d.draft=d.draft||'';
@@ -721,6 +722,7 @@ function paintSpeak(){
 }
 function record(text){
   var t=text.trim(); if(!t) return;
+  S.recent=[t].concat((S.recent||[]).filter(function(x){ return x!==t; })).slice(0,5);
   var now=Date.now(), s=S.stats.sents[t]||{n:0,t:0}; s.n++; s.t=now; S.stats.sents[t]=s;
   wordsOf(t).forEach(function(w){ var o=S.stats.words[w]||{n:0,t:0}; o.n++; o.t=now; S.stats.words[w]=o; });
   var keys=Object.keys(S.stats.sents);
@@ -753,7 +755,7 @@ function renderChips(){
     var b=document.createElement('button');
     b.type='button'; b.className='b3 chip'+(sug.kind==='word'?' b':''); b.textContent=sug.text;
     b.addEventListener('click',function(){
-      if(sug.direct){ if(say(sug.text)) record(sug.text); return; }
+      if(sug.kind==='sentence'){ if(say(sug.text)){ record(sug.text); renderChips(); } return; }
       box.value=applySuggestion(box.value,sug);
       onType();
       box.focus(); box.setSelectionRange(box.value.length,box.value.length);
@@ -791,6 +793,7 @@ $('nextBtn').addEventListener('click',function(){
 
 // tabs: the meeting tab is virtual (its phrases live on the meeting)
 function getTab(id){
+  if(id==='__fav') return {id:'__fav',name:'즐겨찾기',color:'p',fav:true,items:(S.recent||[]).map(function(t,i){ return {id:'f'+i,text:t}; })};
   if(id==='__meet'){ var m=sessionMeeting(); return m?{id:'__meet',name:'이번 약속',color:'y',items:filled(m),virtual:true}:null; }
   for(var i=0;i<S.tabs.length;i++) if(S.tabs[i].id===id) return S.tabs[i];
   return null;
@@ -804,6 +807,7 @@ function renderRail(){
     b.addEventListener('click',fn); r.appendChild(b); return b;
   }
   mk('쓰기',COLOR_CLS.b,function(){ S.cur='write'; save(); renderSpeak(); },S.cur==='write');
+  mk('즐겨\n찾기',COLOR_CLS.p,function(){ S.cur='__fav'; save(); renderSpeak(); },S.cur==='__fav');
   if(session) mk('이번\n약속',COLOR_CLS.y,function(){ S.cur='__meet'; save(); renderSpeak(); },S.cur==='__meet');
   S.tabs.forEach(function(t){ mk(t.name,COLOR_CLS[t.color]||'',function(){ S.cur=t.id; save(); renderSpeak(); },S.cur===t.id); });
   if(editMode) mk('+ 탭',' small',function(){ openTab(null); });
@@ -813,22 +817,22 @@ function renderRail(){
 function renderPhraseView(){
   var t=getTab(S.cur);
   $('tabTitle').textContent=t.name;
-  $('renameBtn').hidden=!editMode||!!t.virtual;
+  $('renameBtn').hidden=!editMode||!!t.virtual||!!t.fav;
   var g=$('grid'); g.innerHTML='';
   t.items.forEach(function(it){
     var b=document.createElement('button'); b.type='button';
-    b.className='b3 tile'+(COLOR_CLS[t.color]||'')+(editMode?' editing':''); b.textContent=it.text;
+    b.className='b3 tile'+(COLOR_CLS[t.color]||'')+(editMode&&!t.fav?' editing':''); b.textContent=it.text;
     b.addEventListener('click',function(){
-      if(editMode){ openEdit(t.id,it.id); return; }
+      if(editMode&&!t.fav){ openEdit(t.id,it.id); return; }
       if(say(it.text)){ record(it.text); showSaid(it.text); }
     });
     g.appendChild(b);
   });
-  if(editMode){
+  if(editMode&&!t.fav){
     var a=document.createElement('button'); a.type='button'; a.className='b3 tile add'; a.textContent='+ 문구 추가';
     a.addEventListener('click',function(){ openEdit(t.id,null); }); g.appendChild(a);
   }else if(!t.items.length){
-    var e=document.createElement('div'); e.className='empty'; e.textContent='문구가 없어요. 아래 "편집"을 눌러 추가하세요.'; g.appendChild(e);
+    var e=document.createElement('div'); e.className='empty'; e.textContent=t.fav?'아직 말한 문장이 없어요. 말하면 여기에 최근 5개가 나와요.':'문구가 없어요. 아래 "편집"을 눌러 추가하세요.'; g.appendChild(e);
   }
 }
 function showSaid(text){
@@ -838,7 +842,7 @@ function showSaid(text){
 }
 function renderSpeak(){
   if(S.cur==='__meet'&&!session) S.cur='write';
-  if(S.cur!=='write'&&S.cur!=='__meet'&&!getTab(S.cur)) S.cur='write';
+  if(S.cur!=='write'&&S.cur!=='__meet'&&S.cur!=='__fav'&&!getTab(S.cur)) S.cur='write';
   var write=S.cur==='write';
   $('writeView').hidden=!write; $('phraseView').hidden=write;
   $('bigrow').classList.toggle('nospeak',!write);
