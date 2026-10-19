@@ -1,5 +1,5 @@
 // Offline cache. Pages load from the network first (so updates show up straight away) and fall back to the cache.
-var VERSION='omma-v2';
+var VERSION='omma-v3';
 var FILES=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(VERSION).then(function(c){ return c.addAll(FILES); }).then(function(){ return self.skipWaiting(); }));
