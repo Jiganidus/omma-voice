@@ -747,12 +747,13 @@ var box=$('box');
 function renderChips(){
   var host=$('chips'); host.innerHTML='';
   var m=sessionMeeting(), sugs;
-  if(m&&!box.value.trim()) sugs=filled(m).slice(0,4).map(function(p){ return {kind:'sentence',text:p.text.trim()}; });
+  if(m&&!box.value.trim()) sugs=filled(m).slice(0,4).map(function(p){ return {kind:'sentence',text:p.text.trim(),direct:true}; });
   else sugs=predict(box.value,model(),4);
   sugs.forEach(function(sug){
     var b=document.createElement('button');
     b.type='button'; b.className='b3 chip'+(sug.kind==='word'?' b':''); b.textContent=sug.text;
     b.addEventListener('click',function(){
+      if(sug.direct){ if(say(sug.text)) record(sug.text); return; }
       box.value=applySuggestion(box.value,sug);
       onType();
       box.focus(); box.setSelectionRange(box.value.length,box.value.length);
