@@ -234,6 +234,42 @@ body.kb #nav{display:none}
 .warn small{display:block; font-weight:500; font-size:10px; color:#8A6B69}
 @media (prefers-reduced-motion: reduce){ #callOverlay .big{animation:none} .b3{transition:none} }
 
+/* ---------- record page / archive table ---------- */
+.muted{color:var(--muted); font-weight:500; font-size:11px}
+#recBody{flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-bottom:12px; -webkit-overflow-scrolling:touch}
+.card{border:2px solid var(--rose); border-radius:12px; background:var(--cream); color:var(--on); padding:8px 10px; display:flex; flex-direction:column; gap:6px}
+.card h3{margin:0; font-size:14px; display:flex; justify-content:space-between; align-items:baseline; gap:6px}
+.card h3 small{font-size:11px; font-weight:500; color:#8A6B69}
+.card .meta{font-size:12px; color:#8A6B69}
+.card .txt{font-size:15px; line-height:1.4; white-space:pre-wrap; overflow-wrap:break-word}
+.card .none{font-size:13px; color:#8A6B69}
+.lines{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px}
+.lines li{display:flex; gap:8px; font-size:15px; line-height:1.35; padding:4px 6px; border-radius:8px; background:#fff; border:1px solid var(--line)}
+.lines time{flex:none; width:44px; font-size:12px; color:#8A6B69; padding-top:2px}
+.pl{display:flex; align-items:center; gap:8px}
+.pl .pp{width:42px; height:42px; min-height:42px; padding:0; border-radius:50%; flex:none; font-size:16px; margin-bottom:3px}
+.pl .bar{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px}
+.pl input[type=range]{width:100%; height:22px; margin:0; -webkit-appearance:none; appearance:none; background:transparent; accent-color:var(--rose)}
+.pl input[type=range]::-webkit-slider-runnable-track{height:8px; border-radius:99px; background:linear-gradient(to right,var(--rose) var(--p,0%),#fff var(--p,0%)); border:1px solid var(--rose)}
+.pl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--red); border:2px solid #fff; margin-top:-8px; box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.pl input[type=range]::-moz-range-track{height:8px; border-radius:99px; background:#fff; border:1px solid var(--rose)}
+.pl input[type=range]::-moz-range-progress{height:8px; border-radius:99px; background:var(--rose)}
+.pl input[type=range]::-moz-range-thumb{width:18px; height:18px; border-radius:50%; background:var(--red); border:2px solid #fff}
+.pl .tm{display:flex; justify-content:space-between; font-size:11px; color:#8A6B69; font-variant-numeric:tabular-nums}
+.pl a{font-size:12px; font-weight:800; color:var(--on)}
+#aSearch{height:34px; border-radius:10px; border:2px solid var(--rose); background:var(--cream); color:var(--on); font:inherit; font-size:14px; padding:0 10px; outline:0; width:100%}
+#archBody{flex:1; min-height:0; overflow:auto; border:2px solid var(--rose); border-radius:10px; background:#fff; color:var(--on)}
+.tbl{display:grid; grid-template-columns:78px minmax(110px,1fr) 62px 68px; min-width:100%; font-size:13px}
+.tbl>div{padding:6px 6px; border-bottom:1px solid var(--line); border-right:1px solid var(--line); display:flex; align-items:center; line-height:1.25; overflow-wrap:anywhere; min-height:38px}
+.tbl>div:nth-child(4n){border-right:0}
+.tbl .th{position:sticky; top:0; z-index:2; background:var(--yellow); font-weight:800; min-height:30px; border-bottom:2px solid var(--rose)}
+.tbl .row{cursor:pointer}
+.tbl .c{justify-content:center; text-align:center}
+.tbl .rowA>div{background:#fff} .tbl .rowB>div{background:#FFF8F6}
+.tbl .t{font-weight:800}
+.tbl .ok{color:#3E7B49; font-weight:900}
+.tbl .no{color:#B79A98}
+
 </style>
 </head>
 <body>
@@ -276,6 +312,7 @@ body.kb #nav{display:none}
     <div class="mt-bar">
       <input id="mSearch" type="search" placeholder="약속 검색" aria-label="약속 검색" autocomplete="off">
       <button id="mFilter" class="b3 b" type="button">필터<span id="mBadge" class="badge" hidden></span></button>
+      <button id="mTable" class="b3 p" type="button">기록표</button>
     </div>
     <button id="mAdd" class="b3 p" type="button">+ 약속 추가</button>
     <div id="mList"></div>
@@ -299,6 +336,25 @@ body.kb #nav{display:none}
       <button id="bStart" class="b3 p" type="button">미팅 시작</button>
       <button id="bEnd" class="b3 r" type="button" hidden>미팅 끝내기</button>
     </div>
+  </section>
+
+  <section id="pgRec" class="page" hidden>
+    <div class="bh">
+      <button id="rBack" class="b3 back" type="button" aria-label="뒤로">←</button>
+      <div id="rTitle" class="bh-title"></div>
+      <span id="rStatus" class="tag"></span>
+    </div>
+    <div id="recBody"></div>
+  </section>
+
+  <section id="pgArch" class="page" hidden>
+    <div class="bh">
+      <button id="aBack" class="b3 back" type="button" aria-label="뒤로">←</button>
+      <div class="bh-title">기록표 <small class="muted">Archive</small></div>
+      <button id="aCsv" class="b3 b" type="button">엑셀 파일로 저장</button>
+    </div>
+    <input id="aSearch" type="search" placeholder="기록 검색 (약속, 메모, 받아쓰기)" autocomplete="off" aria-label="기록 검색">
+    <div id="archBody"></div>
   </section>
 
   <nav id="nav" aria-label="메뉴"></nav>
@@ -348,14 +404,6 @@ body.kb #nav{display:none}
   </div>
 </div>
 
-<div id="recsModal" class="modal" hidden>
-  <div class="panel" role="dialog" aria-labelledby="recsTitle">
-    <h3 id="recsTitle">기록</h3>
-    <div id="recsBody" style="display:flex;flex-direction:column;gap:12px"></div>
-    <button id="recsClose" class="b3 b" type="button">닫기</button>
-  </div>
-</div>
-
 <div id="setModal" class="modal" hidden>
   <div class="panel" role="dialog" aria-labelledby="setTitle">
     <h3 id="setTitle">설정</h3>
@@ -366,6 +414,8 @@ body.kb #nav{display:none}
     <label>목소리 크기<input id="setVol" type="range" min="0.2" max="1" step="0.05"></label>
     <div class="row"><button id="testVoice" class="b3" type="button">목소리 들어보기</button><button id="testCall" class="b3 r" type="button">부르는 소리 들어보기</button></div>
     <p class="hint">부르는 소리가 작으면 휴대폰의 미디어 볼륨을 올려 주세요.</p>
+    <label class="chk"><input id="setLive" type="checkbox">회의 중 자동 받아쓰기 (실험 기능)</label>
+    <p class="hint">회의 중 주변 말소리를 글자로 받아 적어요. 인터넷이 필요하고, 휴대폰에 따라 녹음과 같이 안 될 수 있어요. 내가 소리 내서 말한 문장도 같이 적혀요.</p>
     <h3>백업</h3>
     <p class="hint">문구, 약속, 메모판이 이 휴대폰에 저장돼요. 녹음 파일은 백업에 들어가지 않아요. 가끔 복사해서 메모나 이메일에 보관해 두세요.</p>
     <div class="row"><button id="bkCopy" class="b3" type="button">백업 복사</button><button id="bkShow" class="b3" type="button">불러오기</button></div>
@@ -665,7 +715,7 @@ var F={status:'all',range:'all',rec:'all'};
 // ---------- settings state (small, localStorage) ----------
 function defaults(){
   return {v:2,cur:'write',draft:'',hist:[],recent:[],stats:{sents:{},words:{}},
-    set:{lang:'ko-KR',voice:'',rate:1,vol:1,favMax:5},
+    set:{lang:'ko-KR',voice:'',rate:1,vol:1,favMax:5,live:false},
     tabs:DEFAULT_TABS.map(function(t){ return {id:uid(),name:t.name,color:t.color,items:t.items.map(function(x){ return {id:uid(),text:x}; })}; })};
 }
 function sane(d){
@@ -930,7 +980,7 @@ function renderSpeak(){
 // ---------- edit sheets (phrases / tabs) ----------
 function show(id){ $(id).hidden=false; }
 function hide(id){ $(id).hidden=true; }
-['editModal','tabModal','apptModal','filterModal','recsModal','setModal'].forEach(function(id){
+['editModal','tabModal','apptModal','filterModal','setModal'].forEach(function(id){
   $(id).addEventListener('click',function(e){ if(e.target===$(id)) hide(id); });
 });
 function arm(key,btn,idle,armed,fn){
@@ -1210,42 +1260,159 @@ $('bRecStart').addEventListener('click',async function(){
   var r=await Rec.start(m.id); recResult(r); renderTop(); renderBoardHeader();
 });
 
-// ---------- records / archive panel ----------
+// ---------- records page: player, transcript, said log ----------
 function clearUrls(){ urls.forEach(function(u){ URL.revokeObjectURL(u); }); urls=[]; }
-async function openRecs(id){
-  var m=meetingById(id); if(!m) return;
-  clearUrls();
-  $('recsTitle').textContent=meetingName(m);
-  var body=$('recsBody'); body.innerHTML='';
-  var parts=m.audio||[];
-  for(var i=0;i<parts.length;i++){
-    var a=parts[i], rec=await Store.get('audio',a.id), item=document.createElement('div'); item.className='rec-item';
-    var h=document.createElement('strong'); h.textContent='녹음 '+(i+1)+' · '+fmtDur(a.dur||0); item.appendChild(h);
-    if(rec&&rec.blob){
-      var u=URL.createObjectURL(rec.blob); urls.push(u);
-      var au=document.createElement('audio'); au.controls=true; au.preload='metadata'; au.src=u; item.appendChild(au);
-      var dl=document.createElement('a'); dl.href=u; dl.download=safeFile(meetingName(m))+(parts.length>1?' '+(i+1):'')+'.'+Rec.extFor(a.mime); dl.textContent='파일로 저장'; item.appendChild(dl);
-    }else{ var x=document.createElement('div'); x.textContent='녹음 파일을 찾을 수 없어요'; item.appendChild(x); }
-    body.appendChild(item);
+var recId=null, prevPage='meetings';
+function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+function clock(sec){ sec=Math.max(0,Math.floor(sec||0)); var h=Math.floor(sec/3600), m=Math.floor(sec%3600/60), s=sec%60; return (h?h+':'+pad2(m):m)+':'+pad2(s); }
+function makePlayer(blob,durMs,fname){
+  var u=URL.createObjectURL(blob); urls.push(u);
+  var au=new Audio(); au.preload='metadata'; au.src=u;
+  var box=el('div','pl'), pp=el('button','b3 pp','▶'), bar=el('div','bar'), rg=el('input'), tm=el('div','tm'), cur=el('span','','0:00'), tot=el('span','','');
+  pp.type='button'; rg.type='range'; rg.min=0; rg.max=1000; rg.value=0; rg.step=1;
+  var total=(durMs||0)/1000, seeking=false, raf=0;
+  function dur(){ return isFinite(au.duration)&&au.duration>0?au.duration:total; }
+  function paint(){
+    var d=dur()||1, c=Math.min(au.currentTime||0,d);
+    if(!seeking) rg.value=Math.round(c/d*1000);
+    rg.style.setProperty('--p',(c/d*100)+'%'); cur.textContent=clock(c); tot.textContent=clock(dur());
   }
+  function loop(){ paint(); if(!au.paused&&!au.ended) raf=requestAnimationFrame(loop); }
+  au.addEventListener('loadedmetadata',function(){
+    if(!isFinite(au.duration)){ // recorder files often lack a length; force the browser to find it
+      au.currentTime=1e101;
+      au.addEventListener('timeupdate',function once(){ au.removeEventListener('timeupdate',once); au.currentTime=0; paint(); });
+    }
+    paint();
+  });
+  au.addEventListener('play',function(){ pp.textContent='❚❚'; cancelAnimationFrame(raf); loop(); });
+  au.addEventListener('pause',function(){ pp.textContent='▶'; cancelAnimationFrame(raf); paint(); });
+  au.addEventListener('ended',function(){ pp.textContent='▶'; cancelAnimationFrame(raf); au.currentTime=0; paint(); });
+  au.addEventListener('timeupdate',paint);
+  pp.addEventListener('click',function(){ if(au.paused) au.play().catch(function(){}); else au.pause(); });
+  rg.addEventListener('input',function(){ seeking=true; var d=dur(); rg.style.setProperty('--p',(rg.value/10)+'%'); cur.textContent=clock(d*rg.value/1000); });
+  rg.addEventListener('change',function(){ var d=dur(); try{ au.currentTime=d*rg.value/1000; }catch(e){} seeking=false; paint(); });
+  tm.appendChild(cur); tm.appendChild(tot); bar.appendChild(rg); bar.appendChild(tm);
+  box.appendChild(pp); box.appendChild(bar);
+  var a=el('a','','저장'); a.href=u; a.download=fname; box.appendChild(a);
+  tot.textContent=clock(total); paint();
+  return box;
+}
+function transcriptOf(m){ return (m.transcript||[]); }
+function openRecs(id){ var m=meetingById(id); if(!m) return; recId=id; prevPage=(ui.page==='archive')?'archive':(ui.page==='notes'||ui.page==='board'||ui.page==='record'?'board':'meetings'); if(session) prevPage='board'; ui.page='record'; renderAll(); }
+async function renderRecord(){
+  var m=meetingById(recId); if(!m) return;
+  clearUrls();
+  $('rTitle').textContent=meetingName(m);
+  var st=$('rStatus'); st.textContent=m.status==='live'?'진행 중':(m.status==='done'?'완료':'예정'); st.className='tag'+(m.status==='live'?' live':(m.status==='done'?' done':''));
+  var body=$('recBody'); body.innerHTML='';
+  // audio
+  var c=el('div','card'), h=el('h3'); h.appendChild(el('span','','녹음')); h.appendChild(el('small','','Voice recording')); c.appendChild(h);
+  var parts=m.audio||[];
+  if(!parts.length) c.appendChild(el('div','none','녹음이 없어요'));
+  for(var i=0;i<parts.length;i++){
+    var a=parts[i], rec=await Store.get('audio',a.id);
+    if(rec&&rec.blob){
+      if(parts.length>1) c.appendChild(el('div','meta','녹음 '+(i+1)));
+      c.appendChild(makePlayer(rec.blob,a.dur,safeFile(meetingName(m))+(parts.length>1?' '+(i+1):'')+'.'+Rec.extFor(a.mime)));
+    }else c.appendChild(el('div','none','녹음 파일을 찾을 수 없어요'));
+  }
+  body.appendChild(c);
+  // transcript
+  var t=el('div','card'), th=el('h3'); th.appendChild(el('span','','받아쓰기')); th.appendChild(el('small','','Transcript')); t.appendChild(th);
+  var tr=transcriptOf(m);
+  if(tr.length){
+    var ul=el('ul','lines'), t0=m.startedAt||tr[0].t;
+    tr.forEach(function(x){ var li=el('li'), tmm=el('time','',clock((x.t-t0)/1000)); li.appendChild(tmm); li.appendChild(document.createTextNode(x.text)); ul.appendChild(li); });
+    t.appendChild(ul);
+    var cp=el('button','b3 mini','받아쓰기 복사'); cp.type='button';
+    cp.addEventListener('click',function(){ var txt=tr.map(function(x){ return x.text; }).join('\n'); try{ navigator.clipboard.writeText(txt); toast('복사했어요'); }catch(e){} });
+    t.appendChild(cp);
+  }else t.appendChild(el('div','none',S.set.live?'받아 적은 내용이 아직 없어요':'자동 받아쓰기가 꺼져 있어요. 설정에서 켤 수 있어요.'));
+  body.appendChild(t);
+  // notes template
+  var n=el('div','card'), nh=el('h3'); nh.appendChild(el('span','','메모')); nh.appendChild(el('small','','Notes')); n.appendChild(nh);
+  var any=false;
+  SEC.forEach(function(sec){ var v=secText(m,sec.k).trim(); if(v){ any=true; n.appendChild(el('div','meta',sec.ko+' · '+sec.en)); n.appendChild(el('div','txt',v)); } });
+  filled(m).forEach(function(p,i){ if(i===0){ any=true; n.appendChild(el('div','meta','말할 내용')); } n.appendChild(el('div','txt','• '+p.text.trim())); });
+  if(!any) n.appendChild(el('div','none','적은 메모가 없어요'));
+  body.appendChild(n);
+  // said
+  var sd=el('div','card'), sh=el('h3'); sh.appendChild(el('span','','내가 말한 것')); sh.appendChild(el('small','','What I said')); sd.appendChild(sh);
   var said=m.said||[];
   if(said.length){
-    var h2=document.createElement('h3'); h2.textContent='내가 말한 것'; body.appendChild(h2);
-    var ul=document.createElement('ul'); ul.className='said-log';
-    said.forEach(function(s){
-      var li=document.createElement('li'), tm=document.createElement('time'), d=new Date(s.t);
-      tm.textContent=pad2(d.getHours())+':'+pad2(d.getMinutes()); li.appendChild(tm); li.appendChild(document.createTextNode(s.text)); ul.appendChild(li);
-    });
-    body.appendChild(ul);
-  }
-  if(!parts.length&&!said.length){
-    var e=document.createElement('div'); e.className='empty-box';
-    var img=document.createElement('img'); img.src=SPRITES.sheepZzz; img.alt=''; e.appendChild(img);
-    var p=document.createElement('div'); p.textContent='아직 기록이 없어요'; e.appendChild(p); body.appendChild(e);
-  }
-  show('recsModal');
+    var ul2=el('ul','lines');
+    said.forEach(function(s2){ var li=el('li'), d=new Date(s2.t); li.appendChild(el('time','',pad2(d.getHours())+':'+pad2(d.getMinutes()))); li.appendChild(document.createTextNode(s2.text)); ul2.appendChild(li); });
+    sd.appendChild(ul2);
+  }else sd.appendChild(el('div','none','말한 문장이 없어요'));
+  body.appendChild(sd);
+  body.scrollTop=0;
 }
-$('recsClose').addEventListener('click',function(){ hide('recsModal'); clearUrls(); });
+$('rBack').addEventListener('click',function(){ clearUrls(); ui.page=session?'notes':prevPage; if(ui.page==='board'&&!session) ui.page='board'; renderAll(); });
+
+// ---------- archive table ("spreadsheet" of every appointment) ----------
+function totalDur(m){ return (m.audio||[]).reduce(function(a,x){ return a+(x.dur||0); },0); }
+function haystack(m){ return [m.title,m.place||'',m.date,m.time,SEC_KEYS.map(function(k){ return secText(m,k); }).join(' '),filled(m).map(function(p){ return p.text; }).join(' '),transcriptOf(m).map(function(x){ return x.text; }).join(' '),(m.said||[]).map(function(x){ return x.text; }).join(' ')].join(' ').toLowerCase(); }
+function renderArchive(){
+  var q=$('aSearch').value.trim().toLowerCase(), qj=jamo(q);
+  var list=MT.slice().sort(function(a,b){ return meetingStart(b)-meetingStart(a); }).filter(function(m){ if(!q) return true; var h=haystack(m); return h.indexOf(q)>=0||jamo(h).indexOf(qj)>=0; });
+  var host=$('archBody'); host.innerHTML='';
+  if(!list.length){ host.appendChild(el('div','empty-box',MT.length?'찾는 기록이 없어요':'아직 기록이 없어요')); return; }
+  var g=el('div','tbl');
+  ['날짜','약속','녹음','받아쓰기'].forEach(function(t){ g.appendChild(el('div','th'+(t==='약속'||t==='날짜'?'':' c'),t)); });
+  list.forEach(function(m,i){
+    var cls=(i%2?'rowB':'rowA')+' row', d=meetingStart(m);
+    var cells=[
+      el('div',cls,String(d.getFullYear()).slice(2)+'.'+pad2(d.getMonth()+1)+'.'+pad2(d.getDate())+'\n'+m.time),
+      el('div',cls+' t',m.title),
+      el('div',cls+' c '+(m.audio&&m.audio.length?'ok':'no'),m.audio&&m.audio.length?'▶ '+clock(totalDur(m)/1000):'–'),
+      el('div',cls+' c '+(transcriptOf(m).length?'ok':'no'),transcriptOf(m).length?'✓':'–')
+    ];
+    cells[0].style.whiteSpace='pre-line';
+    cells.forEach(function(c){ c.addEventListener('click',function(){ openRecs(m.id); }); g.appendChild(c); });
+  });
+  host.appendChild(g);
+}
+$('mTable').addEventListener('click',function(){ ui.page='archive'; renderAll(); });
+$('aBack').addEventListener('click',function(){ ui.page='meetings'; renderAll(); });
+$('aSearch').addEventListener('input',renderArchive);
+function csvCell(v){ v=String(v==null?'':v); return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+$('aCsv').addEventListener('click',function(){
+  var rows=[['날짜','시간','약속','장소','상태','녹음 길이','녹음 파일명','핵심 내용','물어볼 것','해야 할 일','말할 내용','받아쓰기','내가 말한 것']];
+  MT.slice().sort(function(a,b){ return meetingStart(a)-meetingStart(b); }).forEach(function(m){
+    var n=(m.audio||[]).length, base=safeFile(meetingName(m));
+    var names=(m.audio||[]).map(function(a,i){ return base+(n>1?' '+(i+1):'')+'.'+Rec.extFor(a.mime); }).join('\n');
+    rows.push([m.date,m.time,m.title,m.place||'',m.status==='done'?'완료':(m.status==='live'?'진행 중':'예정'),n?clock(totalDur(m)/1000):'',names,secText(m,'key'),secText(m,'ask'),secText(m,'act'),filled(m).map(function(p){ return p.text.trim(); }).join('\n'),transcriptOf(m).map(function(x){ return x.text; }).join('\n'),(m.said||[]).map(function(x){ return x.text; }).join('\n')]);
+  });
+  var csv='﻿'+rows.map(function(r){ return r.map(csvCell).join(','); }).join('\r\n');
+  var u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})), a=document.createElement('a'), d=new Date();
+  a.href=u; a.download='Omma-meetings-'+d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+'.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); },4000);
+  toast('엑셀 파일로 저장했어요');
+});
+
+// ---------- live captions (experimental, Web Speech API) ----------
+var SRC=window.SpeechRecognition||window.webkitSpeechRecognition, rc=null, rcOn=false;
+function liveStart(){
+  if(!SRC||!S.set.live||rcOn||!session) return;
+  rcOn=true;
+  function go(){
+    if(!rcOn) return;
+    var r=new SRC(); rc=r; r.continuous=true; r.interimResults=false; r.lang=S.set.lang;
+    r.onresult=function(e){
+      var m=sessionMeeting(); if(!m) return;
+      m.transcript=m.transcript||[];
+      for(var i=e.resultIndex;i<e.results.length;i++){
+        if(e.results[i].isFinal){ var t=e.results[i][0].transcript.trim(); if(t) m.transcript.push({t:Date.now(),text:t}); }
+      }
+      saveMeetings();
+    };
+    r.onerror=function(e){ if(e&&(e.error==='not-allowed'||e.error==='service-not-allowed'||e.error==='audio-capture')) rcOn=false; };
+    r.onend=function(){ if(rcOn) setTimeout(go,400); };
+    try{ r.start(); }catch(e){ rcOn=false; }
+  }
+  go();
+}
+function liveStop(){ rcOn=false; try{ if(rc) rc.stop(); }catch(e){} rc=null; }
 
 // ---------- live session ----------
 async function wakeOn(){
@@ -1266,16 +1433,18 @@ async function startSession(id){
   session={id:id}; Store.put('kv','session',session);
   ui.page='notes'; S.cur='write'; renderAll(); wakeOn();
   var r=await Rec.start(id); recResult(r); renderTop(); renderBoardHeader();
+  liveStart();
 }
 async function endSession(){
   var m=sessionMeeting(); if(!m) return;
   flushBoard();
+  liveStop();
   var meta=await Rec.stop();
   if(meta){ m.audio=m.audio||[]; m.audio.push(meta); }
   m.status='done'; m.endedAt=Date.now(); saveMeetings();
   session=null; await Store.del('kv','session'); wakeOff();
   if(S.cur==='__meet') S.cur='write';
-  ui.page='board'; renderAll(); toast('저장했어요');
+  toast('저장했어요');
   openRecs(m.id);
 }
 setInterval(function(){ if(session) renderRecPill(); },1000);
@@ -1296,7 +1465,7 @@ function renderTop(){
 function renderNav(){
   var nav=$('nav'); nav.innerHTML='';
   var items=session?[['notes','메모','Notes'],['speak','말하기','Speak']]:[['notebook','노트북','Notebook'],['meetings','약속','Meetings']];
-  nav.hidden=(!session&&ui.page==='board');
+  nav.hidden=(!session&&(ui.page==='board'||ui.page==='record'||ui.page==='archive'));
   items.forEach(function(it){
     var b=document.createElement('button'); b.type='button';
     b.className='b3 navb'+((ui.page===it[0])?' on':'');
@@ -1316,17 +1485,21 @@ function renderAll(){
   $('pgSpeak').hidden=!(p==='notebook'||p==='speak');
   $('pgMeet').hidden=p!=='meetings';
   $('pgBoard').hidden=!(p==='board'||p==='notes');
+  $('pgRec').hidden=p!=='record';
+  $('pgArch').hidden=p!=='archive';
   renderTop(); renderNav();
   if(p==='notebook'||p==='speak') renderSpeak();
   if(p==='meetings') renderMeet();
   if(p==='board'||p==='notes') renderBoardHeader();
+  if(p==='record') renderRecord();
+  if(p==='archive') renderArchive();
 }
 
 // ---------- settings ----------
 function openSettings(){
   var sel=$('setLang');
   if(!sel.options.length) LANGS.forEach(function(l){ var o=document.createElement('option'); o.value=l[0]; o.textContent=l[1]; sel.appendChild(o); });
-  sel.value=S.set.lang; $('setRate').value=S.set.rate; $('setVol').value=S.set.vol; $('setFav').value=S.set.favMax; $('setFavN').textContent=S.set.favMax;
+  sel.value=S.set.lang; $('setRate').value=S.set.rate; $('setVol').value=S.set.vol; $('setLive').checked=!!S.set.live; $('setFav').value=S.set.favMax; $('setFavN').textContent=S.set.favMax;
   $('bkText').hidden=true; $('bkRow').hidden=true;
   delArmed.reset=false; $('resetBtn').textContent='처음 상태로 되돌리기';
   refreshVoices(); show('setModal');
@@ -1335,6 +1508,7 @@ $('gear').addEventListener('click',openSettings);
 $('setClose').addEventListener('click',function(){ hide('setModal'); });
 $('setLang').addEventListener('change',function(){ S.set.lang=$('setLang').value; S.set.voice=''; save(); refreshVoices(); });
 $('setVoice').addEventListener('change',function(){ S.set.voice=$('setVoice').value; save(); });
+$('setLive').addEventListener('change',function(){ S.set.live=$('setLive').checked; save(); if(!S.set.live) liveStop(); else if(session) liveStart(); });
 $('setFav').addEventListener('input',function(){ S.set.favMax=parseInt($('setFav').value,10)||5; $('setFavN').textContent=S.set.favMax; save(); if(ui.page==='notebook'||ui.page==='speak') renderSpeak(); });
 $('setRate').addEventListener('input',function(){ S.set.rate=parseFloat($('setRate').value); save(); });
 $('setVol').addEventListener('input',function(){ S.set.vol=parseFloat($('setVol').value); save(); });
@@ -1437,7 +1611,7 @@ async function boot(){
   }
   if(sess){
     var lm=meetingById(sess.id);
-    if(lm&&lm.status==='live'){ session={id:lm.id}; ui.page='notes'; await openBoard(lm.id); wakeOn(); }
+    if(lm&&lm.status==='live'){ session={id:lm.id}; ui.page='notes'; await openBoard(lm.id); wakeOn(); liveStart(); }
     else await Store.del('kv','session');
   }
   if(changed) saveMeetings();
