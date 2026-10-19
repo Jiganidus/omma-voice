@@ -185,8 +185,10 @@ body.kb #nav{display:none}
 #bMount{flex:1; min-height:0; display:flex; flex-direction:column; gap:4px; overflow-y:auto}
 .nlab{font-size:12px; font-weight:800; color:var(--text)}
 .nlab small{font-weight:500; color:var(--muted); font-size:11px; margin-left:4px}
-.nframe{flex:1 1 55%; min-height:120px}
-#nNotes{flex:1; min-width:0; width:100%; resize:none; border:0; outline:0; background:transparent; font:inherit; font-size:18px; line-height:1.35; font-weight:600; color:var(--on); padding:6px 8px}
+.sec{margin-bottom:2px}
+.sec .nlab{display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 6px}
+.sec textarea{display:block; width:100%; flex:0 0 100%; margin-top:3px; resize:none; overflow:auto; font:inherit; font-size:16px; line-height:1.35; font-weight:600; color:var(--on); background:#fff; border:2px solid var(--rose); border-radius:9px; padding:6px 8px; min-height:74px}
+.sec textarea::placeholder{color:#B79A98; font-weight:500; font-size:14px}
 #nPhr{display:flex; flex-direction:column; gap:4px}
 .prow{display:flex; gap:5px; align-items:flex-start}
 .prow textarea{flex:1; min-width:0; resize:none; overflow:hidden; font:inherit; font-size:15px; line-height:1.25; font-weight:600; color:var(--on); background:#fff; border:2px solid var(--rose); border-radius:9px; padding:4px 8px; min-height:30px}
@@ -286,8 +288,7 @@ body.kb #nav{display:none}
       <span id="bStatus" class="tag"></span>
     </div>
     <div id="bMount">
-      <label class="nlab" for="nNotes">메모</label>
-      <div class="frame nframe"><div class="in"><textarea id="nNotes" placeholder="여기에 적으세요" autocomplete="off" spellcheck="false"></textarea></div></div>
+      <div id="nSecs"></div>
       <div class="nlab">말할 내용 <small>말하기 탭에 버튼으로 나와요</small></div>
       <div id="nPhr"></div>
       <button id="nAdd" class="b3 p" type="button">+ 칸 추가</button>
@@ -708,6 +709,13 @@ function saveMeetings(){
 function meetingById(id){ for(var i=0;i<MT.length;i++) if(MT[i].id===id) return MT[i]; return null; }
 function sessionMeeting(){ return session?meetingById(session.id):null; }
 function flushBoard(){ saveMeetings(); }
+var SEC=[
+  {k:'key',ko:'핵심 내용',en:'Key Points',ph:'예) 요즘 혈압이 높아요\n예) 밤에 잠을 잘 못 자요'},
+  {k:'ask',ko:'물어볼 것',en:'Questions to Ask',ph:'예) 이 약의 부작용이 뭐예요?\n예) 다음 검사는 언제예요?'},
+  {k:'act',ko:'해야 할 일',en:'Actions',ph:'예) 약 처방전 받기\n예) 다음 진료 예약하기'}
+];
+var SEC_KEYS=SEC.map(function(x){ return x.k; });
+function secText(m,k){ return (m.sections&&m.sections[k])||(k==='key'&&!m.sections?(m.notes||''):''); }
 function filled(m){ return (m.phrases||[]).filter(function(p){ return p.text&&p.text.trim(); }); }
 
 // ---------- speech ----------
@@ -776,7 +784,7 @@ function model(){
   var items=[], m=sessionMeeting();
   if(m){
     filled(m).forEach(function(p){ items.push(p.text.trim()); });
-    (m.notes||'').split(/\n+/).forEach(function(line){ line=line.trim(); if(line&&line.length<=80) items.push(line); });
+    SEC_KEYS.map(function(k){ return secText(m,k); }).join('\n').split(/\n+/).forEach(function(line){ line=line.trim(); if(line&&line.length<=80) items.push(line); });
   }
   S.tabs.forEach(function(t){ t.items.forEach(function(i){ items.push(i.text); }); });
   return {sents:S.stats.sents,words:S.stats.words,items:items};
@@ -1112,7 +1120,7 @@ $('fSave').addEventListener('click',function(){
     return;
   }
   var nm=Object.assign({id:uid(),status:'planned',created:Date.now(),audio:[],said:[],calSent:false,
-    notes:'',phrases:[{id:uid(),text:''},{id:uid(),text:''},{id:uid(),text:''}]},f);
+    sections:{key:'',ask:'',act:''},phrases:[{id:uid(),text:''},{id:uid(),text:''},{id:uid(),text:''}]},f);
   MT.push(nm);
   var cal=$('fCal').checked;
   if(cal){ nm.calSent=true; }
@@ -1149,14 +1157,25 @@ function renderPhr(){
     row.appendChild(ta); row.appendChild(x); host.appendChild(row); setTimeout(fit,0);
   });
 }
+function renderSecs(m){
+  var host=$('nSecs'); host.innerHTML='';
+  if(!m.sections){ m.sections={key:m.notes||'',ask:'',act:''}; }
+  SEC.forEach(function(sec){
+    var wrap=document.createElement('div'); wrap.className='sec';
+    var lab=document.createElement('label'); lab.className='nlab'; lab.innerHTML='<span></span><small></small>';
+    lab.firstChild.textContent=sec.ko+':'; lab.lastChild.textContent=sec.en;
+    var ta=document.createElement('textarea'); ta.rows=3; ta.placeholder=sec.ph; ta.spellcheck=false; ta.value=m.sections[sec.k]||'';
+    function fit(){ ta.style.height='auto'; ta.style.height=Math.max(74,Math.min(ta.scrollHeight+2,220))+'px'; }
+    ta.addEventListener('input',function(){ m.sections[sec.k]=ta.value; fit(); saveMeetings(); renderChips(); });
+    lab.appendChild(ta); wrap.appendChild(lab); host.appendChild(wrap); setTimeout(fit,0);
+  });
+}
 async function openBoard(id){
   var m=meetingById(id); if(!m) return;
   bdId=id;
-  var n=$('nNotes'); n.value=m.notes||'';
   if(!(m.phrases||[]).length) m.phrases=[{id:uid(),text:''},{id:uid(),text:''},{id:uid(),text:''}];
-  renderPhr();
+  renderSecs(m); renderPhr();
 }
-$('nNotes').addEventListener('input',function(){ var m=meetingById(bdId); if(m){ m.notes=$('nNotes').value; saveMeetings(); } });
 $('nAdd').addEventListener('click',function(){
   var m=meetingById(bdId); if(!m) return;
   m.phrases.push({id:uid(),text:''}); saveMeetings(); renderPhr();
