@@ -436,7 +436,7 @@ body.kb #emoPop{bottom:88px}
     <label>목소리 <span id="voiceN" style="font-size:12px;color:#888"></span><select id="setVoice"></select></label>
     <button id="voiceTest" type="button" class="b3 c-bl" style="min-height:34px;padding:4px 10px;font-size:13px;margin:4px 0 8px">▶ 이 목소리 들어보기</button>
     <label>말하는 속도<input id="setRate" type="range" min="0.5" max="1.5" step="0.05"></label>
-    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 14/11 15:14</p>
+    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 14/11 15:21</p>
     <button id="setUnhide" type="button" class="b3 c-gr" style="min-height:34px;padding:4px 10px;font-size:13px;margin:0 0 8px">숨긴 아래 버튼 다시 보기</button>
     <label>글자 크기: <b id="setFsN">130%</b><input id="setFs" type="range" min="1" max="1.8" step="0.1"></label>
     <label>즐겨찾기 개수: <b id="setFavN">5</b>개<input id="setFav" type="range" min="3" max="20" step="1"></label>
@@ -905,17 +905,25 @@ function renderChips(){
     host.appendChild(w);
   });
   setTimeout(fitChips,0);
+  fitBox();
 }
 function fitChips(){ var host=$('chips'); if(!host.clientHeight) return; [].forEach.call(host.children,function(w){ w.style.display=''; }); [].forEach.call(host.children,function(w){ if(w.offsetTop+w.offsetHeight>host.clientHeight+2) w.style.display='none'; }); }
-window.addEventListener('resize',function(){ setTimeout(fitChips,50); });
+window.addEventListener('resize',function(){ setTimeout(function(){ fitChips(); fitBox(); },50); });
 document.addEventListener('pointerdown',function(e){ if(chipEdit&&!e.target.closest('#chips')){ chipEdit=false; renderChips(); } });
 function paintNav(){
   $('prevBtn').disabled=!S.hist.length||hp===0;
   $('nextBtn').disabled=hp===null;
 }
+// shrink the typed text so it always fits above the buttons, grow it back when there's room
+function fitBox(){
+  if(!S||!box.clientHeight) return;
+  var base=Math.round(22*(S.set.fs||1.3)), min=14, size=base;
+  box.style.fontSize=size+'px';
+  while(size>min && box.scrollHeight>box.clientHeight+1){ size-=1; box.style.fontSize=size+'px'; }
+}
 function onType(){
   if(box.value.indexOf('\n')>=0){ var pos=box.selectionStart; box.value=box.value.replace(/\n+/g,' ').replace(/ +$/,''); try{ box.setSelectionRange(Math.min(pos,box.value.length),Math.min(pos,box.value.length)); }catch(_){} if(box.value.trim()) $('speakBtn').click(); }
-  hp=null; S.draft=box.value; save(); renderChips(); paintNav(); }
+  hp=null; S.draft=box.value; save(); renderChips(); paintNav(); fitBox(); }
 box.addEventListener('input',onType);
 
 $('backBtn').addEventListener('click',function(){ S.cur='write'; save(); renderSpeak(); });
@@ -1529,7 +1537,7 @@ $('voiceTest').addEventListener('click',function(){ say('안녕하세요. 오늘
 $('setVoice').addEventListener('change',function(){ S.set.voice=$('setVoice').value; save(); });
 $('setUnhide').addEventListener('click',function(){ S.hidden=[]; save(); renderChips(); toast('다시 보여요'); });
 function paintFs(){ if(!S) return; document.documentElement.style.setProperty('--fs',S.set.fs); var n=$('setFsN'); if(n) n.textContent=Math.round(S.set.fs*100)+'%'; }
-$('setFs').addEventListener('input',function(){ S.set.fs=parseFloat($('setFs').value)||1.3; paintFs(); save(); setTimeout(fitChips,30); });
+$('setFs').addEventListener('input',function(){ S.set.fs=parseFloat($('setFs').value)||1.3; paintFs(); save(); setTimeout(function(){ fitChips(); fitBox(); },30); });
 /* keyboard open: give the text box the room */
 (function(){
   var vv=window.visualViewport, base=window.innerHeight, box=$('box');
@@ -1537,7 +1545,7 @@ $('setFs').addEventListener('input',function(){ S.set.fs=parseFloat($('setFs').v
     var h=vv?vv.height:window.innerHeight;
     if(document.activeElement!==box) base=Math.max(base,h);
     var on=document.activeElement===box && h<base*0.8;
-    document.body.classList.toggle('kb',on);
+    document.body.classList.toggle('kb',on); fitBox();
   }
   if(vv) vv.addEventListener('resize',check);
   window.addEventListener('resize',check);
