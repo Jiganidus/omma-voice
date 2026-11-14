@@ -294,6 +294,13 @@ body.kb .ctl3{margin-bottom:6px}
 body.kb #box{padding-bottom:92px}
 body.kb #emoPop{bottom:88px}
 
+/* phrase buttons: long phrases get smaller text and up to 3 lines; the full phrase is still spoken */
+.tile{height:auto; overflow:hidden}
+.tile .tt{display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; word-break:keep-all; overflow-wrap:anywhere}
+.tile.long{font-size:14px}
+.tile.xlong{font-size:13px; line-height:1.15}
+#grid{grid-auto-rows:minmax(36px,auto)}
+
 </style>
 </head>
 <body>
@@ -436,7 +443,7 @@ body.kb #emoPop{bottom:88px}
     <label>목소리 <span id="voiceN" style="font-size:12px;color:#888"></span><select id="setVoice"></select></label>
     <button id="voiceTest" type="button" class="b3 c-bl" style="min-height:34px;padding:4px 10px;font-size:13px;margin:4px 0 8px">▶ 이 목소리 들어보기</button>
     <label>말하는 속도<input id="setRate" type="range" min="0.5" max="1.5" step="0.05"></label>
-    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 14/11 15:27</p>
+    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 14/11 15:29</p>
     <button id="setUnhide" type="button" class="b3 c-gr" style="min-height:34px;padding:4px 10px;font-size:13px;margin:0 0 8px">숨긴 아래 버튼 다시 보기</button>
     <label>글자 크기: <b id="setFsN">130%</b><input id="setFs" type="range" min="1" max="1.8" step="0.1"></label>
     <label>즐겨찾기 개수: <b id="setFavN">5</b>개<input id="setFav" type="range" min="3" max="20" step="1"></label>
@@ -1006,7 +1013,9 @@ function renderPhraseView(){
   var g=$('grid'); g.innerHTML='';
   t.items.forEach(function(it){
     var b=document.createElement('button'); b.type='button';
-    b.className='b3 tile'+(COLOR_CLS[t.color]||'')+(editMode&&!t.fav?' editing':''); b.textContent=it.text;
+    var n=it.text.length;
+    b.className='b3 tile'+(COLOR_CLS[t.color]||'')+(editMode&&!t.fav?' editing':'')+(n>40?' xlong':n>22?' long':'');
+    var sp=document.createElement('span'); sp.className='tt'; sp.textContent=it.text; b.appendChild(sp); b.title=it.text;
     b.addEventListener('click',function(){
       if(editMode&&!t.fav){ openEdit(t.id,it.id); return; }
       if(say(it.text)){ record(it.text); showSaid(it.text); }
