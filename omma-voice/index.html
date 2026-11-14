@@ -97,14 +97,14 @@ img{max-width:100%}
 }
 #box::placeholder{color:#B79A98; font-size:calc(16px * var(--fs,1.3)); font-weight:500}
 
-#chips{display:flex; flex-wrap:wrap; gap:4px 5px; align-content:flex-start; min-height:calc(108px * var(--fs,1.3)); max-height:calc(112px * var(--fs,1.3)); overflow:visible; padding-bottom:2px}
+#chips{display:flex; flex-wrap:wrap; gap:4px 5px; align-content:flex-start; min-height:124px; max-height:128px; overflow:visible; padding-bottom:2px}
 .chipw{position:relative; display:inline-flex; max-width:100%}
 .chipx{position:absolute; top:-6px; right:-4px; width:20px; height:20px; min-height:0; padding:0; border-radius:50%; border:0; background:#555; color:#fff; font-size:14px; line-height:20px; z-index:2}
 #chips.edit .chip{animation:jig .28s infinite alternate ease-in-out}
 #chips.edit .chipw:nth-child(even) .chip{animation-delay:-.14s}
 @keyframes jig{from{transform:rotate(-1.8deg)}to{transform:rotate(1.8deg)}}
 #chips{-webkit-touch-callout:none; user-select:none; position:relative}
-.chip{min-height:calc(28px * var(--fs,1.3)); padding:3px 10px; border-radius:8px; font-size:calc(14px * var(--fs,1.3)); max-width:100%; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.chip{min-height:30px; padding:3px 10px; border-radius:8px; font-size:15px; max-width:100%; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .ctl3{display:flex; gap:6px; padding:5px; border-radius:14px; background:rgba(255,255,255,.88); margin-bottom:16px}
 .ctl3 .b3{min-height:34px; font-size:14px; padding:2px 0; margin-bottom:3px; width:34px}
 .ctl3 #clearBtn{width:50px}
@@ -113,10 +113,10 @@ img{max-width:100%}
 .vhead{display:flex; align-items:center; justify-content:space-between; gap:8px}
 .vhead h2{margin:0; font-size:16px; font-weight:900; min-width:0; overflow-wrap:break-word}
 .mini{min-height:26px; padding:2px 8px; font-size:12px; border-radius:8px}
-.said{padding:5px 9px; border-radius:10px; background:var(--cream); border:2px solid var(--rose); color:var(--on); font-size:calc(16px * var(--fs,1.3)); font-weight:700; line-height:1.3; overflow-wrap:break-word}
+.said{padding:5px 9px; border-radius:10px; background:var(--cream); border:2px solid var(--rose); color:var(--on); font-size:17px; font-weight:700; line-height:1.3; overflow-wrap:break-word}
 .said em{display:block; font-style:normal; font-size:11px; font-weight:600; color:#8A6B69}
 #grid{flex:1; min-height:0; overflow-y:auto; padding-bottom:116px !important; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; align-content:start; padding:2px 2px 6px}
-.tile{min-height:calc(34px * var(--fs,1.3)); font-size:calc(15px * var(--fs,1.3)); line-height:1.2; padding:4px 8px; overflow-wrap:break-word; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:0}
+.tile{min-height:36px; font-size:16px; line-height:1.2; padding:4px 8px; overflow-wrap:break-word; display:flex; align-items:center; justify-content:center; text-align:center; margin-bottom:0}
 .tile.editing{outline:3px dashed var(--rose); outline-offset:2px}
 .tile.add{background:var(--cream); box-shadow:0 3px 0 var(--rose); font-size:14px}
 .empty{grid-column:1/-1; color:var(--muted); padding:8px 4px; font-size:14px}
@@ -126,7 +126,7 @@ img{max-width:100%}
 .sqb.small{height:28px; min-height:28px; font-size:11px; background:var(--cream); box-shadow:0 3px 0 var(--rose); border:1px dashed var(--rose)}
 .spacer{flex:1}
 
-.bigrow{position:absolute; z-index:6; left:24px; right:82px; bottom:calc(17px + 112px * var(--fs,1.3)); display:flex; justify-content:space-between; align-items:flex-end; pointer-events:none}
+.bigrow{position:absolute; z-index:6; left:24px; right:82px; bottom:141px; display:flex; justify-content:space-between; align-items:flex-end; pointer-events:none}
 .bigrow>*{pointer-events:auto}
 .bigrow.nospeak{bottom:6px; right:66px; left:24px}
 .bigrow.nospeak .ctl3{display:none}
@@ -436,7 +436,7 @@ body.kb #emoPop{bottom:88px}
     <label>목소리 <span id="voiceN" style="font-size:12px;color:#888"></span><select id="setVoice"></select></label>
     <button id="voiceTest" type="button" class="b3 c-bl" style="min-height:34px;padding:4px 10px;font-size:13px;margin:4px 0 8px">▶ 이 목소리 들어보기</button>
     <label>말하는 속도<input id="setRate" type="range" min="0.5" max="1.5" step="0.05"></label>
-    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 14/11 15:21</p>
+    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 14/11 15:27</p>
     <button id="setUnhide" type="button" class="b3 c-gr" style="min-height:34px;padding:4px 10px;font-size:13px;margin:0 0 8px">숨긴 아래 버튼 다시 보기</button>
     <label>글자 크기: <b id="setFsN">130%</b><input id="setFs" type="range" min="1" max="1.8" step="0.1"></label>
     <label>즐겨찾기 개수: <b id="setFavN">5</b>개<input id="setFav" type="range" min="3" max="20" step="1"></label>
