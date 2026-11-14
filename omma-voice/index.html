@@ -310,7 +310,7 @@ body.kb #emoPop{bottom:88px}
     <div class="sp-main">
       <main class="sp-col">
         <section id="writeView" class="view">
-          <div class="frame"><div class="in"><textarea id="box" placeholder="여기에 입력하세요" aria-label="말할 내용" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea></div></div>
+          <div class="frame"><div class="in"><textarea id="box" enterkeyhint="send" placeholder="여기에 입력하세요" aria-label="말할 내용" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea></div></div>
           <div id="chips" aria-label="추천 단어와 문장"></div>
         </section>
         <section id="phraseView" class="view" hidden>
@@ -436,7 +436,7 @@ body.kb #emoPop{bottom:88px}
     <label>목소리 <span id="voiceN" style="font-size:12px;color:#888"></span><select id="setVoice"></select></label>
     <button id="voiceTest" type="button" class="b3 c-bl" style="min-height:34px;padding:4px 10px;font-size:13px;margin:4px 0 8px">▶ 이 목소리 들어보기</button>
     <label>말하는 속도<input id="setRate" type="range" min="0.5" max="1.5" step="0.05"></label>
-    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 14/11 15:02</p>
+    <p style="font-size:12px;color:#888;margin:0 0 6px">버전 14/11 15:14</p>
     <button id="setUnhide" type="button" class="b3 c-gr" style="min-height:34px;padding:4px 10px;font-size:13px;margin:0 0 8px">숨긴 아래 버튼 다시 보기</button>
     <label>글자 크기: <b id="setFsN">130%</b><input id="setFs" type="range" min="1" max="1.8" step="0.1"></label>
     <label>즐겨찾기 개수: <b id="setFavN">5</b>개<input id="setFav" type="range" min="3" max="20" step="1"></label>
@@ -913,7 +913,9 @@ function paintNav(){
   $('prevBtn').disabled=!S.hist.length||hp===0;
   $('nextBtn').disabled=hp===null;
 }
-function onType(){ hp=null; S.draft=box.value; save(); renderChips(); paintNav(); }
+function onType(){
+  if(box.value.indexOf('\n')>=0){ var pos=box.selectionStart; box.value=box.value.replace(/\n+/g,' ').replace(/ +$/,''); try{ box.setSelectionRange(Math.min(pos,box.value.length),Math.min(pos,box.value.length)); }catch(_){} if(box.value.trim()) $('speakBtn').click(); }
+  hp=null; S.draft=box.value; save(); renderChips(); paintNav(); }
 box.addEventListener('input',onType);
 
 $('backBtn').addEventListener('click',function(){ S.cur='write'; save(); renderSpeak(); });
@@ -945,6 +947,8 @@ $('backBtn').addEventListener('click',function(){ S.cur='write'; save(); renderS
   }
   sb.addEventListener('pointerup',end); sb.addEventListener('pointercancel',end);
   sb.addEventListener('contextmenu',function(e){ e.preventDefault(); });
+  // keep the keyboard open when tapping these, so one tap is enough
+  ['speakBtn','prevBtn','clearBtn','nextBtn'].forEach(function(id){ $(id).addEventListener('mousedown',function(e){ if(document.activeElement===box) e.preventDefault(); }); });
   sb.addEventListener('click',function(){
     if(sb._skip) return;
     if(speaking){ stopSay(); return; }
